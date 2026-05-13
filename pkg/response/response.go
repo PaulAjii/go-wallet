@@ -9,6 +9,18 @@ type APIResponse struct {
 	Error   string      `json:"error,omitempty"`
 }
 
-func JSON(c fiber.Ctx, message string, data interface{}, statusCode int) error
+func JSON(c fiber.Ctx, message string, data interface{}, statusCode int) error {
+	return c.Status(statusCode).JSON(APIResponse{
+		Status:  true,
+		Message: message,
+		Data:    data,
+	})
+}
 
-func Error(c fiber.Ctx, message string, err string, statusCode int) error
+func Error(c fiber.Ctx, message string, err string, statusCode int) error {
+	return c.Status(statusCode).JSON(APIResponse{
+		Status:  false,
+		Message: message,
+		Error:   err,
+	})
+}
