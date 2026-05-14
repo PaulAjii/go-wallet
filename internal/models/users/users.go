@@ -8,6 +8,6 @@ type UsersModel struct {
 	FullName   string `json:"fullName" db:"full_name"`
 	Username   string `json:"username" db:"username"`
 	Email      string `json:"email" db:"email"`
-	Password   string `json:"_" db:"password_hash"`
+	Password   string `json:"-" db:"password_hash"`
 	IsVerified bool   `json:"isVerified" db:"is_verified"`
 }
