@@ -15,7 +15,7 @@ func NewWalletRepository() *WalletRepository {
 	return &WalletRepository{}
 }
 
-func (r *WalletRepository) CreateWallet(ctx context.Context, wallet wallets.WalletModel) error {
+func (r *WalletRepository) CreateWallet(ctx context.Context, wallet *wallets.WalletModel) error {
 	stmt := `
 		INSERT INTO wallets (user_id, account_id, balance, currency, is_active)
 		VALUES ($1, $2, $3, $4, $5)
@@ -23,12 +23,12 @@ func (r *WalletRepository) CreateWallet(ctx context.Context, wallet wallets.Wall
 	`
 
 	return database.Pool.QueryRow(ctx, stmt,
-		wallet.UserID,
-		wallet.AccountID,
-		wallet.Balance,
-		wallet.Currency,
-		wallet.IsActive,
-	).Scan(&wallet.ID, wallet.CreatedAt, wallet.UpdatedAt)
+		&wallet.UserID,
+		&wallet.AccountID,
+		&wallet.Balance,
+		&wallet.Currency,
+		&wallet.IsActive,
+	).Scan(&wallet.ID, &wallet.CreatedAt, &wallet.UpdatedAt)
 }
 
 func (r *WalletRepository) GetByID(ctx context.Context, id string) (*wallets.WalletModel, error) {
