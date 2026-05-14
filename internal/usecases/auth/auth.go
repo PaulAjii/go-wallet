@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
+	"unicode/utf8"
 
 	"github.com/PaulAjii/go-wallet/internal/dtos"
 	"github.com/PaulAjii/go-wallet/internal/models/users"
@@ -45,6 +46,10 @@ func (a *AuthUsecase) Register(ctx context.Context, payload dtos.RegisterRequest
 	}
 	if existing != nil {
 		return nil, errors.New("username already exists")
+	}
+
+	if utf8.RuneCountInString(payload.Password) < 8 {
+		return nil, errors.New("password length must be equal to or more than 8")
 	}
 
 	hashed, err := bcrypt.GenerateFromPassword([]byte(payload.Password), bcrypt.DefaultCost)
@@ -87,6 +92,7 @@ func (a *AuthUsecase) Register(ctx context.Context, payload dtos.RegisterRequest
 		User: dtos.UserResponse{
 			ID:         createdUser.ID.String(),
 			FullName:   createdUser.FullName,
+			Username:   createdUser.Username,
 			Email:      createdUser.Email,
 			IsVerified: createdUser.IsVerified,
 		},
