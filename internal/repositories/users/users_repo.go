@@ -19,7 +19,7 @@ func (r *UsersRepository) CreateUsers(ctx context.Context, user *users.UsersMode
 	stmt := `
 		INSERT INTO users (full_name, username, email, password_hash, is_verified)
 		VALUES($1, $2, $3, $4, $5)
-		RETURNING id, created_at, updated_at
+		RETURNING id, full_name, username, email, is_verified, created_at, updated_at
 	`
 
 	var u users.UsersModel
@@ -89,6 +89,7 @@ func (r *UsersRepository) GetByEmail(ctx context.Context, email string) (*users.
 		&u.ID,
 		&u.FullName,
 		&u.Username,
+		&u.Password,
 		&u.Email,
 		&u.IsVerified,
 		&u.CreatedAt,
@@ -117,6 +118,7 @@ func (r *UsersRepository) GetByUsername(ctx context.Context, username string) (*
 		&u.ID,
 		&u.FullName,
 		&u.Username,
+		&u.Password,
 		&u.Email,
 		&u.IsVerified,
 		&u.CreatedAt,
