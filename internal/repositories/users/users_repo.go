@@ -15,20 +15,38 @@ func NewUsersRepository() *UsersRepository {
 	return &UsersRepository{}
 }
 
-func (r *UsersRepository) CreateUsers(ctx context.Context, user users.UsersModel) error {
+func (r *UsersRepository) CreateUsers(ctx context.Context, user *users.UsersModel) (*users.UsersModel, error) {
 	stmt := `
 		INSERT INTO users (full_name, username, email, password_hash, is_verified)
 		VALUES($1, $2, $3, $4, $5)
 		RETURNING id, created_at, updated_at
 	`
 
-	return database.Pool.QueryRow(ctx, stmt,
-		user.FullName,
-		user.Username,
-		user.Email,
-		user.Password,
-		user.IsVerified,
-	).Scan(user.ID, user.CreatedAt, user.UpdatedAt)
+	var u users.UsersModel
+	err := database.Pool.QueryRow(ctx, stmt,
+		&user.FullName,
+		&user.Username,
+		&user.Email,
+		&user.Password,
+		&user.IsVerified,
+	).Scan(
+		&u.ID,
+		&u.FullName,
+		&u.Username,
+		&u.Email,
+		&u.IsVerified,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &u, nil
 }
 
 func (r *UsersRepository) GetByID(ctx context.Context, id string) (*users.UsersModel, error) {
@@ -61,7 +79,7 @@ func (r *UsersRepository) GetByID(ctx context.Context, id string) (*users.UsersM
 
 func (r *UsersRepository) GetByEmail(ctx context.Context, email string) (*users.UsersModel, error) {
 	stmt := `
-		SELECT id, full_name, username, email, is_verified, created_at, updated_at
+		SELECT id, full_name, username, password_hash, email, is_verified, created_at, updated_at
 		FROM users
 		WHERE email = $1
 	`
@@ -89,7 +107,7 @@ func (r *UsersRepository) GetByEmail(ctx context.Context, email string) (*users.
 
 func (r *UsersRepository) GetByUsername(ctx context.Context, username string) (*users.UsersModel, error) {
 	stmt := `
-		SELECT id, full_name, username, email, is_verified, created_at, updated_at
+		SELECT id, full_name, username, password_hash, email, is_verified, created_at, updated_at
 		FROM users
 		WHERE username = $1
 	`
