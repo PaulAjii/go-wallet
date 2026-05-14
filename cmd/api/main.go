@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/PaulAjii/go-wallet/internal/routers"
 	"github.com/PaulAjii/go-wallet/pkg/config"
 	"github.com/PaulAjii/go-wallet/pkg/database"
 	"github.com/gofiber/fiber/v3"
@@ -48,6 +49,7 @@ func main() {
 	})
 
 	// Setup Routes
+	routers.SetupRoutes(app)
 
 	serverErrors := make(chan error, 1)
 
