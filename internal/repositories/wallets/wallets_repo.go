@@ -15,14 +15,14 @@ func NewWalletRepository() *WalletRepository {
 	return &WalletRepository{}
 }
 
-func (r *WalletRepository) CreateWallet(ctx context.Context, wallet *wallets.WalletModel) error {
+func (r *WalletRepository) CreateWallet(ctx context.Context, q database.Querier, wallet *wallets.WalletModel) error {
 	stmt := `
 		INSERT INTO wallets (user_id, account_id, balance, currency, is_active)
 		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id, created_at, updated_at
 	`
 
-	return database.Pool.QueryRow(ctx, stmt,
+	return q.QueryRow(ctx, stmt,
 		&wallet.UserID,
 		&wallet.AccountID,
 		&wallet.Balance,
