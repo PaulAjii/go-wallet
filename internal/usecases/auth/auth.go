@@ -14,6 +14,7 @@ import (
 	usersRepo "github.com/PaulAjii/go-wallet/internal/repositories/users"
 	walletsRepo "github.com/PaulAjii/go-wallet/internal/repositories/wallets"
 	"github.com/PaulAjii/go-wallet/pkg/config"
+	"github.com/PaulAjii/go-wallet/pkg/database"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -57,6 +58,12 @@ func (a *AuthUsecase) Register(ctx context.Context, payload dtos.RegisterRequest
 		return nil, err
 	}
 
+	tx, err := database.Pool.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
 	user := users.UsersModel{
 		FullName:   payload.FullName,
 		Username:   payload.Username,
@@ -65,7 +72,7 @@ func (a *AuthUsecase) Register(ctx context.Context, payload dtos.RegisterRequest
 		IsVerified: false,
 	}
 
-	createdUser, err := a.userRepo.CreateUsers(ctx, &user)
+	createdUser, err := a.userRepo.CreateUsers(ctx, tx, &user)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +85,11 @@ func (a *AuthUsecase) Register(ctx context.Context, payload dtos.RegisterRequest
 		IsActive:  true,
 	}
 
-	if err := a.walletRepo.CreateWallet(ctx, &wallet); err != nil {
+	if err := a.walletRepo.CreateWallet(ctx, tx, &wallet); err != nil {
+		return nil, err
+	}
+
+	if err = tx.Commit(ctx); err != nil {
 		return nil, err
 	}
 
