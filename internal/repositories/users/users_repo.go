@@ -15,7 +15,7 @@ func NewUsersRepository() *UsersRepository {
 	return &UsersRepository{}
 }
 
-func (r *UsersRepository) CreateUsers(ctx context.Context, user *users.UsersModel) (*users.UsersModel, error) {
+func (r *UsersRepository) CreateUsers(ctx context.Context, q database.Querier, user *users.UsersModel) (*users.UsersModel, error) {
 	stmt := `
 		INSERT INTO users (full_name, username, email, password_hash, is_verified)
 		VALUES($1, $2, $3, $4, $5)
@@ -23,7 +23,7 @@ func (r *UsersRepository) CreateUsers(ctx context.Context, user *users.UsersMode
 	`
 
 	var u users.UsersModel
-	err := database.Pool.QueryRow(ctx, stmt,
+	err := q.QueryRow(ctx, stmt,
 		&user.FullName,
 		&user.Username,
 		&user.Email,
