@@ -22,10 +22,15 @@ const (
 	ErrUsernameAlreadyExists = "Username Already Exists"
 	ErrInvalidPasswordLength = "Password Must Be At Least 8 Characters"
 	ErrVerificationFailed    = "Email Verification Failed"
+	ErrFailedToLoadProfile   = "Failed To Fetch User Details"
 )
 
 const (
 	CreationSuccess     = "User created successfully"
 	LoginSuccess        = "User Logged In Successfully"
 	VerificationSuccess = "Email Verified Successfully"
+)
+
+const (
+	UserProfileFetchSuccess = "Fetched User Profile Successfully"
 )
