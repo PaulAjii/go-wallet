@@ -24,3 +24,7 @@ type AuthResponse struct {
 	Token string       `json:"token"`
 	User  UserResponse `json:"user"`
 }
+
+type VerifyEmailRequest struct {
+	Token string `json:"token"`
+}
