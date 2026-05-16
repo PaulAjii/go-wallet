@@ -20,9 +20,11 @@ const (
 	ErrEmailAlreadyExists    = "Email Already Exists"
 	ErrUsernameAlreadyExists = "Username Already Exists"
 	ErrInvalidPasswordLength = "Password Must Be At Least 8 Characters"
+	ErrVerificationFailed    = "Email Verification Failed"
 )
 
 const (
-	CreationSuccess = "User created successfully"
-	LoginSuccess    = "User Logged In Successfully"
+	CreationSuccess     = "User created successfully"
+	LoginSuccess        = "User Logged In Successfully"
+	VerificationSuccess = "Email Verified Successfully"
 )
