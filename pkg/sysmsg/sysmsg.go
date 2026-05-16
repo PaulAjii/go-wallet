@@ -14,6 +14,7 @@ const (
 )
 
 const (
+	ErrUnauthorized          = "Unauthorized"
 	ErrBadReq                = "Invalid Request Body"
 	ErrInvalidCredentials    = "Email Or Password Is Invalid"
 	ErrInternalServerError   = "An Internal Server Error Occurred"
