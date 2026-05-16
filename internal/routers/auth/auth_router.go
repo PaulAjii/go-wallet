@@ -6,11 +6,11 @@ import (
 )
 
 func SetupRoutes(api fiber.Router, h *auth.AuthHandler) {
-	user := api.Group("/auth")
+	auth := api.Group("/auth")
 
 	// Staff management
-	user.Post("/register", h.Register)
-	user.Post("/login", h.Login)
-	user.Post("/verify-email", h.VerifyEmail)
+	auth.Post("/register", h.Register)
+	auth.Post("/login", h.Login)
+	auth.Post("/verify-email", h.VerifyEmail)
 
 }
