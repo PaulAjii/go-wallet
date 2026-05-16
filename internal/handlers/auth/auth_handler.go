@@ -61,3 +61,17 @@ func (h *AuthHandler) Login(c fiber.Ctx) error {
 
 	return response.JSON(c, sysmsg.LoginSuccess, user, fiber.StatusOK)
 }
+
+func (h *AuthHandler) VerifyEmail(c fiber.Ctx) error {
+	var payload dtos.VerifyEmailRequest
+
+	if err := c.Bind().Body(&payload); err != nil {
+		return response.Error(c, sysmsg.ErrBadReq, err.Error(), fiber.StatusBadRequest)
+	}
+
+	if err := h.usecase.VerifyEmail(c.Context(), payload.Token); err != nil {
+		return response.Error(c, sysmsg.ErrVerificationFailed, err.Error(), fiber.StatusBadRequest)
+	}
+
+	return response.JSON(c, sysmsg.VerificationSuccess, nil, fiber.StatusOK)
+}
