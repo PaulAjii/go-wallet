@@ -12,14 +12,14 @@ type TransferRequest struct {
 }
 
 type WithdrawRequest struct {
-	Amount        int64  `json:"amount"`
-	BankCode      string `json:"bankCode"`
-	AccountNumber string `json:"accountNumber"`
-	AccountName   string `json:"accountName"`
+	Amount      int64  `json:"amount"`
+	BankCode    string `json:"bankCode"`
+	AccountID   string `json:"accountID"`
+	AccountName string `json:"accountName"`
 }
 
 type WalletResponse struct {
-	AccountNumber string `json:"accountNumber"`
-	Balance       int64  `json:"balance"`
-	Currency      string `json:"currency"`
+	AccountID string `json:"accountID"`
+	Balance   int64  `json:"balance"`
+	Currency  string `json:"currency"`
 }
