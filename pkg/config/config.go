@@ -19,6 +19,7 @@ type AppConfig struct {
 	Env            string
 	Port           string
 	AllowedOrigins string
+	FrontendURL    string
 }
 
 type DatabaseConfig struct {
@@ -34,7 +35,8 @@ type SupabaseConfig struct {
 }
 
 type ResendConfig struct {
-	APIKey string
+	APIKey    string
+	FromEmail string
 }
 
 var ApplicationConfig *Config
@@ -50,6 +52,7 @@ func Load() {
 			Env:            os.Getenv("APP_ENV"),
 			Port:           os.Getenv("APP_PORT"),
 			AllowedOrigins: os.Getenv("APP_ALLOWED_ORIGINS"),
+			FrontendURL:    os.Getenv("APP_FRONTEND_URL"),
 		},
 		DatabaseConfig{
 			URL: os.Getenv("DATABASE_URI"),
@@ -62,7 +65,8 @@ func Load() {
 			JWTSecret:      os.Getenv("SUPABASE_JWT_SECRET"),
 		},
 		ResendConfig{
-			APIKey: os.Getenv("RESEND_API_KEY"),
+			APIKey:    os.Getenv("RESEND_API_KEY"),
+			FromEmail: os.Getenv("RESEND_FROM_EMAIL"),
 		},
 	}
 }
