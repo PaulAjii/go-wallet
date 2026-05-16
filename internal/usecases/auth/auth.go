@@ -13,6 +13,7 @@ import (
 	"github.com/PaulAjii/go-wallet/internal/models/wallets"
 	usersRepo "github.com/PaulAjii/go-wallet/internal/repositories/users"
 	walletsRepo "github.com/PaulAjii/go-wallet/internal/repositories/wallets"
+	"github.com/PaulAjii/go-wallet/internal/services"
 	"github.com/PaulAjii/go-wallet/pkg/config"
 	"github.com/PaulAjii/go-wallet/pkg/database"
 	"github.com/golang-jwt/jwt/v5"
@@ -93,6 +94,17 @@ func (a *AuthUsecase) Register(ctx context.Context, payload dtos.RegisterRequest
 		return nil, err
 	}
 
+	verificationToken, err := generateVerificationToken(createdUser.ID.String())
+	if err == nil {
+		verificationLink := fmt.Sprintf(
+			"%s/verify-email?token=%s",
+			config.ApplicationConfig.App.FrontendURL,
+			verificationToken,
+		)
+
+		go services.SendVerificationEmail(createdUser.Email, verificationLink)
+	}
+
 	token, err := generateToken(createdUser.ID.String())
 	if err != nil {
 		return nil, err
@@ -140,8 +152,68 @@ func (a *AuthUsecase) Login(ctx context.Context, payload dtos.LoginRequest) (*dt
 	}, nil
 }
 
+func (a *AuthUsecase) VerifyEmail(ctx context.Context, token string) error {
+	userID, err := parseVerificationToken(token)
+	if err != nil {
+		return err
+	}
+
+	user, err := a.userRepo.GetByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		return errors.New("User not found")
+	}
+
+	if user.IsVerified {
+		return errors.New("Email already verified")
+	}
+
+	return a.userRepo.Verify(ctx, userID)
+}
+
 func generateAccountID() string {
 	return fmt.Sprintf("%010d", 1000000000+rand.Intn(9000000000))
+}
+
+func generateVerificationToken(userID string) (string, error) {
+	claims := jwt.MapClaims{
+		"sub":     userID,
+		"iat":     time.Now().Unix(),
+		"exp":     time.Now().Add(24 * time.Hour).Unix(),
+		"purpose": "email_verification",
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(config.ApplicationConfig.Supabase.JWTSecret))
+}
+
+func parseVerificationToken(tokenString string) (string, error) {
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+		return []byte(config.ApplicationConfig.Supabase.JWTSecret), nil
+	})
+	if err != nil || !token.Valid {
+		return "", errors.New("Invalid or expired token")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", errors.New("Invalid token claims")
+	}
+
+	purpose, ok := claims["purpose"].(string)
+	if !ok || purpose != "email_verification" {
+		return "", errors.New("Invlaid token purpose")
+	}
+
+	sub, ok := claims["sub"].(string)
+	if !ok {
+		return "", errors.New("Invalid user ID")
+	}
+
+	return sub, nil
 }
 
 func generateToken(userID string) (string, error) {
