@@ -2,8 +2,10 @@ package users
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
+	"github.com/PaulAjii/go-wallet/internal/dtos"
 	"github.com/PaulAjii/go-wallet/internal/models/users"
 	"github.com/PaulAjii/go-wallet/pkg/database"
 	"github.com/jackc/pgx/v5"
@@ -142,4 +144,65 @@ func (r *UsersRepository) Verify(ctx context.Context, id string) error {
 
 	_, err := database.Pool.Exec(ctx, stmt, id)
 	return err
+}
+
+func (r *UsersRepository) GetProfile(ctx context.Context, id string) (*dtos.ProfileDTO, error) {
+	stmt := `
+        SELECT 
+            u.id, u.full_name, u.username, u.email, u.is_verified,
+            w.account_number, w.balance, w.currency,
+            COALESCE(
+                (
+                    SELECT jsonb_agg(
+                        jsonb_build_object(
+                            'reference', t.reference,
+                            'type', t.type,
+                            'category', t.category,
+                            'amount', t.amount,
+                            'balanceBefore', t.balance_before,
+                            'balanceAfter', t.balance_after,
+                            'status', t.status,
+                            'createdAt', t.created_at
+                        ) ORDER BY t.created_at DESC
+                    )
+                    FROM (
+                        SELECT * FROM transactions
+                        WHERE wallet_id = w.id
+                        ORDER BY created_at DESC
+                        LIMIT 10
+                    ) t
+                ),
+                '[]'::jsonb
+            ) AS transactions
+        FROM users u
+        JOIN wallets w ON w.user_id = u.id
+        WHERE u.id = $1
+    `
+
+	var (
+		txsJSON  []byte
+		userJSON dtos.ProfileDTO
+	)
+
+	err := database.Pool.QueryRow(ctx, stmt, id).Scan(
+		&userJSON.User.ID,
+		&userJSON.User.FullName,
+		&userJSON.User.Username,
+		&userJSON.User.Email,
+		&userJSON.User.IsVerified,
+		&userJSON.Wallet.AccountNumber,
+		&userJSON.Wallet.Balance,
+		&userJSON.Wallet.Currency,
+		&txsJSON,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err = json.Unmarshal(txsJSON, &userJSON.Transaction); err != nil {
+		return nil, err
+	}
+
+	return &userJSON, nil
 }
