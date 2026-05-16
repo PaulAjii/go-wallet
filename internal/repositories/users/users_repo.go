@@ -150,7 +150,7 @@ func (r *UsersRepository) GetProfile(ctx context.Context, id string) (*dtos.Prof
 	stmt := `
         SELECT 
             u.id, u.full_name, u.username, u.email, u.is_verified,
-            w.account_number, w.balance, w.currency,
+            w.account_id, w.balance, w.currency,
             COALESCE(
                 (
                     SELECT jsonb_agg(
@@ -190,7 +190,7 @@ func (r *UsersRepository) GetProfile(ctx context.Context, id string) (*dtos.Prof
 		&userJSON.User.Username,
 		&userJSON.User.Email,
 		&userJSON.User.IsVerified,
-		&userJSON.Wallet.AccountNumber,
+		&userJSON.Wallet.AccountID,
 		&userJSON.Wallet.Balance,
 		&userJSON.Wallet.Currency,
 		&txsJSON,
