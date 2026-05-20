@@ -13,6 +13,7 @@ type Config struct {
 	Database DatabaseConfig
 	Supabase SupabaseConfig
 	Resend   ResendConfig
+	Paystack PaystackConfig
 }
 
 type AppConfig struct {
@@ -37,6 +38,10 @@ type SupabaseConfig struct {
 type ResendConfig struct {
 	APIKey    string
 	FromEmail string
+}
+
+type PaystackConfig struct {
+	PaystackSecret string
 }
 
 var ApplicationConfig *Config
@@ -67,6 +72,9 @@ func Load() {
 		ResendConfig{
 			APIKey:    os.Getenv("RESEND_API_KEY"),
 			FromEmail: os.Getenv("RESEND_FROM_EMAIL"),
+		},
+		PaystackConfig{
+			PaystackSecret: os.Getenv("PAYSTACK_SECRET"),
 		},
 	}
 }
